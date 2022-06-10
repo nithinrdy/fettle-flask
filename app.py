@@ -19,8 +19,9 @@ def home():
 
 @app.route('/data', methods=['GET'])
 def data():
-    to_client = df.drop(['symptomVectors', 'rarityScore', 'cleaned_disease', 'symptoms', 'level_0'], axis=1)
-    return json.loads(to_client.to_json(orient='index'))
+    to_client = df.drop(['symptomVectors', 'symptoms', 'index', 'level_0'], axis=1)
+    k = to_client.to_json(orient='records')
+    return jsonify(json.loads(k))
 
 # @app.route('/query', methods=['GET'])
 # def query():
