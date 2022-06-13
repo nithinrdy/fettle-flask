@@ -11,6 +11,7 @@ from flask_bcrypt import Bcrypt
 
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 # model = SentenceTransformer('all-MiniLM-L12-v2')
 df = pd.read_csv('diseases__encoded.csv').reset_index()
@@ -57,7 +58,7 @@ def login():
     user = User.query.filter_by(username=username).first()
     if user:
         if bcrypt.check_password_hash(user.password, password):
-            return jsonify({'success': True, 'user': user.username, 'd_list': user.d_list})
+            return jsonify({'success': True, 'id': user.id, 'user': user.username, 'd_list': user.d_list})
         else:
             return jsonify({'success': False, 'message': 'Incorrect password'})
     else:
@@ -75,8 +76,15 @@ def register():
         user = User(username, bcrypt.generate_password_hash(password), [])
         db.session.add(user)
         db.session.commit()
-        return jsonify({'success': True, 'user': user.username, 'd_list': user.d_list})
+        return jsonify({'success': True, 'id': user.id, 'user': user.username, 'd_list': user.d_list})
 
+@app.route('/user/tokenauth', methods=['POST'])
+def tokenauth():
+    data = request.json
+    token = data['token']
+    user = User.query.filter_by(id=token).first() # Yes, it is what it looks like.
+    if user:
+        return jsonify({'success': True, 'id': user.id, 'user': user.username, 'd_list': user.d_list})
 
 
 
