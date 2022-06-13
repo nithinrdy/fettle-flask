@@ -49,11 +49,11 @@ def data():
 #     cosine_sim = cosine_similarity([vecs], df['symptomVectors'].values)
 #     return jsonify({'similarity_score': str(cosine_sim[0][0])})
 
-@app.route('/user/login')
+@app.route('/user/login', methods=['POST'])
 def login():
-    args = request.args
-    username = args.get('username')
-    password = args.get('password')
+    data = request.json
+    username = data['username']
+    password = data['password']
     user = User.query.filter_by(username=username).first()
     if user:
         if bcrypt.check_password_hash(user.password, password):
@@ -61,13 +61,13 @@ def login():
         else:
             return jsonify({'success': False, 'message': 'Incorrect password'})
     else:
-        return jsonify({'success': False, 'message': 'User not found'})
+        return jsonify({'success': False, 'message': 'User %s not found' % username})
 
-@app.route('/user/register')
+@app.route('/user/register', methods=['POST'])
 def register():
-    args = request.args
-    username = args.get('username')
-    password = args.get('password')
+    data = request.json
+    username = data['username']
+    password = data['password']
     user = User.query.filter_by(username=username).first()
     if user:
         return jsonify({'success': False, 'message': 'User already exists'})
