@@ -5,6 +5,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 import pandas as pd
+import numpy as np
 from ast import literal_eval
 from sqlalchemy import JSON
 from flask_bcrypt import Bcrypt
@@ -14,7 +15,7 @@ import jwt
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
-# model = SentenceTransformer('all-MiniLM-L12-v2')
+model = SentenceTransformer("all-MiniLM-L12-v2")
 df = pd.read_csv("diseases__encoded.csv").reset_index()
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -48,12 +49,40 @@ def data():
     return jsonify(json.loads(k))
 
 
-# @app.route('/query', methods=['GET'])
-# def query():
-#     query = request.args.get('query')
-#     vecs = model.encode(query)
-#     cosine_sim = cosine_similarity([vecs], df['symptomVectors'].values)
-#     return jsonify({'similarity_score': str(cosine_sim[0][0])})
+@app.route("/query", methods=["GET"])
+def query():
+    query = request.args.get("query")
+    vecs = model.encode(query)
+
+    def calculateSimilarity(preVec, rScore):
+        cosSim = cosine_similarity([vecs], [np.array(literal_eval(preVec))])[0][0]
+        return cosSim + ((4 - rScore) / 20)
+
+    to_client = df.drop(
+        [
+            "symptoms",
+            "index",
+            "level_0",
+            "primary_description",
+            "secondary_description",
+            "rarity",
+            "symptom_possibility",
+            "raw_symptoms",
+        ],
+        axis=1,
+    )
+    print(to_client["symptomVectors"])
+    to_client["simScore"] = to_client.apply(
+        lambda x: calculateSimilarity((x["symptomVectors"]), x["rarityScore"]),
+        axis=1,
+    )
+    return jsonify(
+        json.loads(
+            to_client.drop(["symptomVectors", "rarityScore"], axis=1)
+            .sort_values(by="simScore", ascending=False)
+            .to_json(orient="records")
+        )
+    )
 
 
 @app.route("/user/login", methods=["POST"])
