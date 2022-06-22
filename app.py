@@ -29,7 +29,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    d_list = db.Column(JSON)
+    d_list = db.Column(db.String(500), nullable=False)
 
     def __init__(self, username, password, d_list):
         self.username = username
@@ -116,7 +116,7 @@ def register():
     if user:
         return jsonify({"success": False, "message": "User already exists"})
     else:
-        user = User(username, bcrypt.generate_password_hash(password), [])
+        user = User(username, bcrypt.generate_password_hash(password), "")
         db.session.add(user)
         db.session.commit()
         return jsonify(
@@ -146,6 +146,38 @@ def tokenauth():
         )
     else:
         return jsonify({"success": False, "message": "User not found"})
+
+
+@app.route("/user/profile/add", methods=["PUT"])
+def additem():
+    token = request.headers.get("Authorization").split(" ")[1]
+    tokenObject = jwt.decode(token, SAMPLE_SECRET_KEY, algorithms=["HS256"])
+    username = tokenObject["username"]
+    user = User.query.filter_by(username=username).first()
+    if user:
+        data = request.json
+        disease = data["label"]
+        if len(user.d_list) + len(disease) > 498:
+            return jsonify({"success": False, "message": "No more items can be added"})
+        user.d_list += " " + disease
+        user.d_list = user.d_list.strip()
+        db.session.commit()
+        return jsonify({"success": True, "d_list": user.d_list})
+
+
+@app.route("/user/profile/remove", methods=["PUT"])
+def removeitem():
+    token = request.headers.get("Authorization").split(" ")[1]
+    tokenObject = jwt.decode(token, SAMPLE_SECRET_KEY, algorithms=["HS256"])
+    username = tokenObject["username"]
+    user = User.query.filter_by(username=username).first()
+    if user:
+        data = request.json
+        disease = data["label"]
+        user.d_list = user.d_list.replace(disease, "").strip()
+        user.d_list = user.d_list.strip()
+        db.session.commit()
+        return jsonify({"success": True, "d_list": user.d_list})
 
 
 if __name__ == "__main__":
