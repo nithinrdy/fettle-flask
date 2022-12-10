@@ -12,6 +12,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 bcrypt.init_app(app)
 db.init_app(app)
 
+app.app_context().push()
+
 
 # Registering both blueprints
 app.register_blueprint(auth_blueprint)

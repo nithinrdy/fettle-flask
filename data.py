@@ -42,7 +42,6 @@ def query():
         ],
         axis=1,
     )
-    print(to_client["symptomVectors"])
     to_client["simScore"] = to_client.apply(
         lambda x: calculateSimilarity((x["symptomVectors"]), x["rarityScore"]),
         axis=1,
