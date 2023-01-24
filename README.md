@@ -2,7 +2,7 @@
 
 This is the backend for fettle. It is a flask app that uses a sqlite database to store data, and serves data retrieved using fettle-scraper.
 
-Uses the SentenceTransformer library to generate embeddings for the symptoms of each diseases, which are then used to find diseases whose symptoms match that of the user's query, which is determined using the cosine similarity between the embeddings.
+Uses the SentenceTransformer library to generate embeddings for the symptoms of each disease, which are then used to find diseases whose symptoms match that of the user's query, which is determined using the cosine similarity between the embeddings.
 
 Also uses BCrypt to hash passwords, and JWT to generate tokens for authentication.
 
