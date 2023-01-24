@@ -4,14 +4,19 @@ from auth_profile import auth_blueprint, bcrypt, db
 from data import data_blueprint
 
 
+# Initialize the Flask app
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
+# Initialize bcrypt and db with the app instance
 bcrypt.init_app(app)
 db.init_app(app)
 
+
+# Manually push the app context so that the db can be used outside of the application context
+# (in the python shell, for example)
 app.app_context().push()
 
 

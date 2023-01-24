@@ -6,8 +6,10 @@ import os
 
 SECRET_KEY = os.getenv("SECRET_KEY", 'secret')
 
+# Blueprint for authorization endpoints
 auth_blueprint = Blueprint("auth", __name__)
 
+# Bcrypt and database instances (latter using SQLAlchemy as the ORM)
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 
@@ -26,6 +28,7 @@ class User(db.Model):
         self.d_list = d_list
 
 
+# Login endpoint, returns JWT if user is found and password hash matches
 def login():
     data = request.json
     username = data["username"]
@@ -47,6 +50,7 @@ def login():
         return jsonify({"success": False, "message": "User %s not found" % username})
 
 
+# Registration endpoint, returns JWT if user doesn't already exist and registration is successful
 def register():
     data = request.json
     username = data["username"]
@@ -73,6 +77,7 @@ def register():
         
 
 
+# Verifies JWT and returns user information if valid
 def tokenauth():
     token = request.headers.get("Authorization").split(" ")[1]
     tokenObject = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -91,6 +96,8 @@ def tokenauth():
         return jsonify({"success": False, "message": "User not found"})
 
 
+# Bookmarking endpoints
+# Handles add request
 def additem():
     token = request.headers.get("Authorization").split(" ")[1]
     tokenObject = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -113,6 +120,7 @@ def additem():
             return jsonify({"success": False, "message": "Error bookmarking item"})
 
 
+# Handles remove request
 def removeitem():
     token = request.headers.get("Authorization").split(" ")[1]
     tokenObject = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -131,6 +139,7 @@ def removeitem():
             return jsonify({"success": False, "message": "Error removing bookmarked item"})
 
 
+# Map the functions to their respective endpoints as handlers
 auth_blueprint.add_url_rule(rule="/user/login", view_func=login, methods=["POST"])
 auth_blueprint.add_url_rule(rule="/user/register", view_func=register, methods=["POST"])
 auth_blueprint.add_url_rule(rule="/user/tokenauth", view_func=tokenauth, methods=["POST"])
