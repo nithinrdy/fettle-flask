@@ -14,6 +14,13 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 bcrypt.init_app(app)
 db.init_app(app)
 
+def create_tables():
+    with app.app_context():
+        db.create_all()
+
+
+create_tables()
+
 
 # Manually push the app context so that the db can be used outside of the application context
 # (in the python shell, for example)

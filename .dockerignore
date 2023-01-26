@@ -1,0 +1,11 @@
+# Git
+.gitignore
+.git
+
+_pycache_
+.python-version
+
+README.md
+
+/instance
+*.db
