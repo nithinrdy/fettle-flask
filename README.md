@@ -21,7 +21,7 @@ For the web app to function as intended, you'll need to perform an additional st
 
 1. Clone the repository
 2. Build the image using `docker build -t <image_name> .`
-3. Run the container using `docker run -p <any_open_port>:5000 -v <a_name_for_your_volume>:/working/instance <the_image_name>` (add a `-d` somewhere in there if you want to run the container in detached mode)
+3. Run the container using `docker run -p <any_open_port>:5000 -v <a_name_for_your_volume>:/working/instance --env SECRET_KEY="<a_secret_key_to_sign_JWTs_with (default is 'secret')>" <the_image_name>` (add a `-d` somewhere in there if you want to run the container in detached mode)
 4. The app should be running on `localhost:<port_you_used_above>`
 
 Note: Building the image will take a while, since the dependencies include a handful of HUGE libraries (like torch).
